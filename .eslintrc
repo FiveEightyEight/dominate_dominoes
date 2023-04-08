@@ -1,25 +1,21 @@
 {
-    "env": {
-      "browser": true,
-      "es2021": true
-    },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 12,
-      "sourceType": "module"
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
     "rules": {
-      "indent": ["error", "tab"],
+      "indent": ["error", "tab", { "SwitchCase": 1 }],
       "quotes": ["error", "single"],
+      "comma-dangle": ["error", "always"],
       "semi": ["error", "always"],
-      "comma-dangle": ["error", "always-multiline"]
+      "@typescript-eslint/indent": ["error", "tab", { "SwitchCase": 1 }],
+      "@typescript-eslint/quotes": ["error", "single"],
+      "@typescript-eslint/comma-dangle": ["error", "always"],
+      "@typescript-eslint/semi": ["error", "always"]
     }
   }
   
