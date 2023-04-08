@@ -1,0 +1,26 @@
+{
+  "name": "dominate_dominoes",
+  "version": "1.0.0",
+  "description": "A sim to help me beat these old-timers at their own game.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@total-typescript/ts-reset": "^0.4.2",
+    "@types/eslint": "^8.37.0",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.38.0"
+  }
+}
