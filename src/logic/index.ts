@@ -1,10 +1,12 @@
 class Domino {
     private sideA: number;
     private sideB: number;
+    private value: number;
 
     constructor(sideA: number, sideB: number) {
         this.sideA = sideA;
         this.sideB = sideB;
+        this.value = sideA + sideB;
     }
 
     getSideA(): number {
@@ -13,6 +15,10 @@ class Domino {
 
     getSideB(): number {
         return this.sideB;
+    }
+
+    getValue(): number {
+        return this.value;
     }
 
     isDouble(): boolean {
