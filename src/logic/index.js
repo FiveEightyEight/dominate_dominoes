@@ -126,23 +126,9 @@ for (var i = 0; i <= 6; i++) {
 var dominoTable = document.querySelector('.top-left-2');
 var rightSide = document.querySelector('.right');
 var dominoesTiles = "";
-// dominoTable.innerHTML = dominoesTiles;
-// ------- GAME STATE --------->
-// type GameState = {
-//     rightSelectedTitle: string;
-// }
-// class GameState {
-//     rightSelectedTile: string;
-//     constructor() {
-//         this.rightSelectedTile = '';
-//     }
-//     setRightSelectedTile(title: string) {
-//         this.rightSelectedTile = title;
-//     }
-// }
-// const state: GameState = {
-//     rightSelectedTile: '',
-// };
+var state = {
+    selected: null,
+};
 // function setGameState(state: GameState, key) {
 // }
 // ------- SETUP --------->
@@ -157,14 +143,20 @@ for (var i = 0; i < dominoes.length; i++) {
     tileElements[id] = "\n        <div class=\"domino-tile\" data-id=".concat(id, ">\n            <div class=\"tile-top ").concat(topDots, "\">\n                ").concat(topDotList, "\n            </div>\n            <div class=\"tile-divider\"></div>\n            <div class=\"tile-bottom ").concat(bottomDots, "\">\n                ").concat(bottomDotList, "\n            </div>\n        </div>\n    ");
 }
 rightSide === null || rightSide === void 0 ? void 0 : rightSide.addEventListener('click', function (e) {
+    var _a;
     var target = e.target;
     var dominoTile = target.closest('.domino-tile');
     if (dominoTile) {
+        if (state.selected && state.selected !== dominoTile) {
+            var previousTile = state === null || state === void 0 ? void 0 : state.selected;
+            (_a = previousTile === null || previousTile === void 0 ? void 0 : previousTile.classList) === null || _a === void 0 ? void 0 : _a.remove('selected');
+        }
         if (dominoTile.classList.contains('selected')) {
             dominoTile.classList.remove('selected');
         }
         else {
             dominoTile.classList.add('selected');
+            state.selected = dominoTile;
         }
     }
 });
@@ -182,10 +174,8 @@ function renderRightSide() {
             var bottomDotList = sideB ? "<span class=\"dot\"></span>".repeat(sideB) : '';
             var id = rowToRender[j].getID();
             rightSide.innerHTML += "\n            <div class=\"domino-tile\" data-id=".concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            ");
-            // Add buffers at after these index 0, 2, 5, 9, 14, 20,
         }
         var row = rowToRender.length;
-        // if (row < 7) {
         rightSide.innerHTML += "\n            <div id=\"cell-".concat(row, "\">\n            </div>\n        ");
     };
     for (var i = 0; i < 7; i++) {

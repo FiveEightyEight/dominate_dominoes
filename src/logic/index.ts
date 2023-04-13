@@ -186,6 +186,14 @@ let dominoesTiles = ``;
 
 // };
 
+type State = {
+    selected: HTMLElement | null;
+}
+
+const state: State = {
+    selected: null,
+}
+
 // function setGameState(state: GameState, key) {
 
 // }
@@ -216,10 +224,15 @@ rightSide?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     const dominoTile = target.closest('.domino-tile');
     if (dominoTile) {
+        if (state.selected && state.selected !== dominoTile) {
+            const previousTile = state?.selected;
+            previousTile?.classList?.remove('selected');
+        }
         if (dominoTile.classList.contains('selected')) {
             dominoTile.classList.remove('selected')
         } else {
             dominoTile.classList.add('selected')
+            state.selected = dominoTile as HTMLElement;
         }
     }
 });
