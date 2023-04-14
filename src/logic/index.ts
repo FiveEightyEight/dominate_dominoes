@@ -50,12 +50,14 @@ class Team {
 class Player {
     private id: number;
     private moves: Domino[];
-    private team: Team;
+    private favorableMove: number[];
+    // private team: Team;
 
-    constructor(id: number, team: Team) {
+    constructor(id: number) {
         this.id = id;
         this.moves = [];
-        this.team = team;
+        this.favorableMove = [];
+        // this.team = team;
     }
 
     getId(): number {
@@ -66,10 +68,15 @@ class Player {
         return this.moves;
     }
 
-    getTeam(): Team {
-        return this.team;
+    // getTeam(): Team {
+    //     return this.team;
+    // }
+    addMove(domino: Domino): void {
+        this.moves.push(domino);
     }
-
+    addFavorableMove(number: number): void {
+        this.favorableMove.push(number);
+    }
     play(domino: Domino): void {
         this.moves.push(domino);
     }
@@ -94,7 +101,7 @@ class Table {
         this.table = [];
     }
 
-    add(domino: Domino, player: Player): void {
+    add(domino: Domino, player: Player): boolean {
         const sideA: number = domino.getSideA();
         const sideB: number = domino.getSideB();
         const newTile: TableDomino = {
@@ -106,30 +113,35 @@ class Table {
         }
         if (this.table.length === 0) {
             this.table.push(newTile);
-            return;
+            return true;
         }
         const firstTile: TableDomino = this.table[0];
         const lastTile: TableDomino = this.table[this.table.length - 1];
 
         if (firstTile.position[0] === sideA) {
-            this.table.unshift(newTile);
-            return;
-        } else if (firstTile.position[0] === sideB) {
             this.table.unshift({
                 ...newTile,
                 position: [sideB, sideA]
             });
-            return;
+            return true;
+        } else if (firstTile.position[0] === sideB) {
+            this.table.unshift(newTile);
+            return true;
         } else if (lastTile.position[1] === sideA) {
             this.table.push(newTile);
-            return;
+            return true;
         } else if (lastTile.position[1] === sideB) {
             this.table.push({
                 ...newTile,
                 position: [sideB, sideA]
             });
-            return;
+            return true;
         }
+        return false;
+    }
+
+    getTable(): TableDomino[] {
+        return this.table;
     }
 
     getTableValue(): number {
@@ -153,6 +165,8 @@ type TilesElements = {
 }
 const tileElements: TilesElements = {};
 const dominoes: Domino[] = [];
+const player1: Player = new Player(1);
+const table: Table = new Table(); 
 
 for (let i = 0; i <= 6; i++) {
     for (let j = i; j <= 6; j++) {
@@ -164,6 +178,8 @@ for (let i = 0; i <= 6; i++) {
 // get element by class name domino-container
 const dominoTable = document.querySelector('.top-left-2');
 const rightSide = document.querySelector('.right');
+const score = document.querySelector('.game-score-payed');
+const scoreRemaining = document.querySelector('.game-score-remaining')
 let dominoesTiles = ``;
 // dominoTable.innerHTML = dominoesTiles;
 
@@ -188,10 +204,18 @@ let dominoesTiles = ``;
 
 type State = {
     selected: HTMLElement | null;
+    total: number;
+    currentScore: number;
+    oldScore: number;
 }
+
+const gameHistory = [];
 
 const state: State = {
     selected: null,
+    total: 168,
+    currentScore: 0,
+    oldScore: 0,
 }
 
 // function setGameState(state: GameState, key) {
@@ -237,6 +261,12 @@ rightSide?.addEventListener('click', (e) => {
     }
 });
 
+function renderScore() {
+    if (!score || !scoreRemaining) return;
+    score.innerHTML = `Played: ${state.currentScore}`;
+    scoreRemaining.innerHTML = `Remaining: ${state.total - state.currentScore}`;
+}
+
 function renderRightSide() {
     if (!rightSide) return;
     for (let i = 0; i < 7; i++) {
@@ -270,4 +300,50 @@ function renderRightSide() {
 
     }
 }
+
+dominoTable?.addEventListener('click', (e) => {
+    if (!state.selected) return;
+    const target = state.selected as HTMLElement;
+    const domino = dominoes.find((domino) => domino.getID() === target?.dataset?.id);
+    if (!domino) return;
+    const pieceAdded = table.add(domino, player1);
+    if (pieceAdded) {
+        gameHistory.push(state);
+        target.classList.remove('selected')
+        target.classList.add('played-tile');
+        state.selected = null;
+        renderTable();
+        state.currentScore += domino.getValue();
+        renderScore();
+    }
+});
+
+function renderTable() {
+    if (!dominoTable) return;
+    const tableTiles = table.getTable();
+    const tableTilesHTML = tableTiles.map((tile) => {
+        const sideA = tile.domino.getSideA();
+        const sideB = tile.domino.getSideB();
+        const topDots = sideA ? `dot-${sideA}` : '';
+        const bottomDots = sideB ? `dot-${sideB}` : '';
+        const topDotList = sideA ? `<span class="dot"></span>`.repeat(sideA) : '';
+        const bottomDotList = sideB ? `<span class="dot"></span>`.repeat(sideB) : '';
+        const id = tile.domino.getID();
+        return `
+            <div class="domino-tile" data-id=${id}>
+                <div class="tile-top ${topDots}">
+                    ${topDotList}
+                </div>
+                <div class="tile-divider"></div>
+                <div class="tile-bottom ${bottomDots}">
+                    ${bottomDotList}
+                </div>
+            </div>
+        `;
+    }).join('');
+    dominoTable.innerHTML = tableTilesHTML;
+}
+ 
+// Execute
+renderScore();
 renderRightSide();
