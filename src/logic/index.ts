@@ -94,6 +94,7 @@ type TableDomino = {
     position: number[];
     id: string;
     value: number;
+    rotation: 'right' | 'left' | 'none';
 }
 class Table {
     private table: TableDomino[];
@@ -109,7 +110,8 @@ class Table {
             player: player,
             position: [sideA, sideB],
             id: domino.getID(),
-            value: domino.getValue()
+            value: domino.getValue(),
+            rotation: domino.isDouble() ? 'none' :'right',
         }
         if (this.table.length === 0) {
             this.table.push(newTile);
@@ -121,14 +123,15 @@ class Table {
         if (firstTile.position[0] === sideA) {
             this.table.unshift({
                 ...newTile,
+                rotation: domino.isDouble() ? 'none' : 'left',
                 position: [sideB, sideA]
             });
             return true;
         } else if (firstTile.position[0] === sideB) {
-            this.table.unshift(newTile);
+            this.table.unshift({ ...newTile, rotation: domino.isDouble() ? 'none' : 'left', });
             return true;
         } else if (lastTile.position[1] === sideA) {
-            this.table.push(newTile);
+            this.table.push({ ...newTile, rotation: domino.isDouble() ? 'none' : 'right', });
             return true;
         } else if (lastTile.position[1] === sideB) {
             this.table.push({
@@ -166,7 +169,7 @@ type TilesElements = {
 const tileElements: TilesElements = {};
 const dominoes: Domino[] = [];
 const player1: Player = new Player(1);
-const table: Table = new Table(); 
+const table: Table = new Table();
 
 for (let i = 0; i <= 6; i++) {
     for (let j = i; j <= 6; j++) {
@@ -328,22 +331,26 @@ function renderTable() {
         const bottomDots = sideB ? `dot-${sideB}` : '';
         const topDotList = sideA ? `<span class="dot"></span>`.repeat(sideA) : '';
         const bottomDotList = sideB ? `<span class="dot"></span>`.repeat(sideB) : '';
+        const rotation = tile.rotation !== 'none' ? `domino-rotate-${tile.rotation}` : '';
+        const rotatedSize = rotation ? 'domino-rotate-size' : '';
         const id = tile.domino.getID();
         return `
-            <div class="domino-tile" data-id=${id}>
-                <div class="tile-top ${topDots}">
-                    ${topDotList}
-                </div>
-                <div class="tile-divider"></div>
-                <div class="tile-bottom ${bottomDots}">
-                    ${bottomDotList}
+            <div class="${rotatedSize}">
+                <div class="domino-tile ${rotation}" data-id=${id}>
+                    <div class="tile-top ${topDots}">
+                        ${topDotList}
+                    </div>
+                    <div class="tile-divider"></div>
+                    <div class="tile-bottom ${bottomDots}">
+                        ${bottomDotList}
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
     dominoTable.innerHTML = tableTilesHTML;
 }
- 
+
 // Execute
 renderScore();
 renderRightSide();

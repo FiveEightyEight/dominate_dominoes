@@ -85,7 +85,8 @@ var Table = /** @class */ (function () {
             player: player,
             position: [sideA, sideB],
             id: domino.getID(),
-            value: domino.getValue()
+            value: domino.getValue(),
+            rotation: domino.isDouble() ? 'none' : 'right',
         };
         if (this.table.length === 0) {
             this.table.push(newTile);
@@ -94,15 +95,15 @@ var Table = /** @class */ (function () {
         var firstTile = this.table[0];
         var lastTile = this.table[this.table.length - 1];
         if (firstTile.position[0] === sideA) {
-            this.table.unshift(__assign(__assign({}, newTile), { position: [sideB, sideA] }));
+            this.table.unshift(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left', position: [sideB, sideA] }));
             return true;
         }
         else if (firstTile.position[0] === sideB) {
-            this.table.unshift(newTile);
+            this.table.unshift(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left' }));
             return true;
         }
         else if (lastTile.position[1] === sideA) {
-            this.table.push(newTile);
+            this.table.push(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'right' }));
             return true;
         }
         else if (lastTile.position[1] === sideB) {
@@ -160,7 +161,7 @@ for (var i = 0; i < dominoes.length; i++) {
     var topDotList = sideA ? "<span class=\"dot\"></span>".repeat(sideA) : '';
     var bottomDotList = sideB ? "<span class=\"dot\"></span>".repeat(sideB) : '';
     var id = dominoes[i].getID();
-    tileElements[id] = "\n        <div class=\"domino-tile\" data-id=".concat(id, ">\n            <div class=\"tile-top ").concat(topDots, "\">\n                ").concat(topDotList, "\n            </div>\n            <div class=\"tile-divider\"></div>\n            <div class=\"tile-bottom ").concat(bottomDots, "\">\n                ").concat(bottomDotList, "\n            </div>\n        </div>\n    ");
+    tileElements[id] = "\n        <div>\n        <div class=\"domino-tile\" data-id=".concat(id, ">\n            <div class=\"tile-top ").concat(topDots, "\">\n                ").concat(topDotList, "\n            </div>\n            <div class=\"tile-divider\"></div>\n            <div class=\"tile-bottom ").concat(bottomDots, "\">\n                ").concat(bottomDotList, "\n            </div>\n        </div>\n        </div>\n    ");
 }
 rightSide === null || rightSide === void 0 ? void 0 : rightSide.addEventListener('click', function (e) {
     var _a;
@@ -199,7 +200,7 @@ function renderRightSide() {
             var topDotList = sideA ? "<span class=\"dot\"></span>".repeat(sideA) : '';
             var bottomDotList = sideB ? "<span class=\"dot\"></span>".repeat(sideB) : '';
             var id = rowToRender[j].getID();
-            rightSide.innerHTML += "\n            <div class=\"domino-tile\" data-id=".concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            ");
+            rightSide.innerHTML += "\n            <div>\n            <div class=\"domino-tile\" data-id=".concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            </div>\n            ");
         }
         var row = rowToRender.length;
         rightSide.innerHTML += "\n            <div id=\"cell-".concat(row, "\">\n            </div>\n        ");
@@ -237,8 +238,10 @@ function renderTable() {
         var bottomDots = sideB ? "dot-".concat(sideB) : '';
         var topDotList = sideA ? "<span class=\"dot\"></span>".repeat(sideA) : '';
         var bottomDotList = sideB ? "<span class=\"dot\"></span>".repeat(sideB) : '';
+        var rotation = tile.rotation !== 'none' ? "domino-rotate-".concat(tile.rotation) : '';
+        var rotatedSize = rotation ? 'domino-rotate-size' : '';
         var id = tile.domino.getID();
-        return "\n            <div class=\"domino-tile\" data-id=".concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n        ");
+        return "\n            <div class=\"".concat(rotatedSize, "\">\n            <div class=\"domino-tile ").concat(rotation, "\" data-id=").concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            </div>\n        ");
     }).join('');
     dominoTable.innerHTML = tableTilesHTML;
 }
