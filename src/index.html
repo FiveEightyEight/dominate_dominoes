@@ -8,10 +8,33 @@
 </head>
 <body>
     <main class="game-board">
-        <div class="top-left-1">Top Left 1</div>
-        <div class="top-left-2">Top Left 2</div>
+        <div class="top-left-1">
+            <section class="game-score">
+                <div class="game-score-total">
+                    Total: 168
+                </div>
+                <div class="game-score-played">
+                    Played: 0
+                </div>
+                <div class="game-score-remaining">
+                    Remaining; 0
+                </div>
+            </section>
+        </div>
+        <div class="top-left-2">
+        </div>
         <div class="right"></div>
-        <div class="footer">Footer</div>
+        <div class="footer">
+            <div></div>
+            <section>
+                <button class="undo-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="undo-svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-6 6m0 0l-6-6m6 6V9a6 6 0 0112 0v3" />
+                  </svg>
+                  Undo
+                </button>
+            </section>
+        </div>
     </main>
   <script src="./logic/index.js"></script>
 </body>
