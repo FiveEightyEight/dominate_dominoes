@@ -36,7 +36,7 @@ html {
 	grid-template-columns: 2fr 1fr;
 	grid-template-rows: repeat(5, 1fr);
 	height: 100%;
-	gap: 10px;
+	gap: .5rem;
 	background-color: black;
 }
 
@@ -72,7 +72,6 @@ html {
 	/* grid-template-columns: repeat(4, 1fr); */
 	grid-template-columns: repeat(8, 1fr);
 	grid-template-rows: repeat(7, 1fr);
-	grid-gap: 5px;
 	align-items: center;
 }
 
@@ -123,7 +122,6 @@ html {
 	height: 6.5rem;
 	background-color: white;
 	border: 1px solid black;
-	position: relative;
 }
 
 .played-tile {
@@ -265,11 +263,17 @@ html {
 }
 
 .domino-rotate-right {
-    transform: rotate(90deg);
+    transform: rotate(90deg) translateX(-1.5rem) translateY(-1.8rem);
 }
 
 .domino-rotate-left {
-    transform: rotate(-90deg);
+    transform: rotate(-90deg) translateX(1.5rem) translateY(1.5rem);
+}
+
+.domino-rotate-size {
+    height: 3.2rem;
+	width: 6.5rem;
+
 }
 
 /* Stats Styles */
