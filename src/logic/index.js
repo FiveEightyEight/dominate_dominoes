@@ -77,7 +77,7 @@ var Table = /** @class */ (function () {
     function Table() {
         this.table = [];
     }
-    Table.prototype.add = function (domino, player) {
+    Table.prototype.add = function (domino, player, closestTileID) {
         var sideA = domino.getSideA();
         var sideB = domino.getSideB();
         var newTile = {
@@ -92,23 +92,30 @@ var Table = /** @class */ (function () {
             this.table.push(newTile);
             return true;
         }
+        var middle = Math.floor(this.table.length / 2);
+        var titleLocation = this.table.findIndex(function (tile) { return tile.id === closestTileID; });
         var firstTile = this.table[0];
         var lastTile = this.table[this.table.length - 1];
-        if (firstTile.position[0] === sideA) {
-            this.table.unshift(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left', position: [sideB, sideA] }));
-            return true;
+        if (titleLocation < middle) {
+            // Left Side
+            if (firstTile.position[0] === sideA) {
+                this.table.unshift(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left', position: [sideB, sideA] }));
+                return true;
+            }
+            else if (firstTile.position[0] === sideB) {
+                this.table.unshift(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left' }));
+                return true;
+            }
         }
-        else if (firstTile.position[0] === sideB) {
-            this.table.unshift(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left' }));
-            return true;
-        }
-        else if (lastTile.position[1] === sideA) {
-            this.table.push(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'right' }));
-            return true;
-        }
-        else if (lastTile.position[1] === sideB) {
-            this.table.push(__assign(__assign({}, newTile), { position: [sideB, sideA] }));
-            return true;
+        else {
+            if (lastTile.position[1] === sideA) {
+                this.table.push(__assign(__assign({}, newTile), { rotation: domino.isDouble() ? 'none' : 'left' }));
+                return true;
+            }
+            else if (lastTile.position[1] === sideB) {
+                this.table.push(__assign(__assign({}, newTile), { position: [sideB, sideA] }));
+                return true;
+            }
         }
         return false;
     };
@@ -140,7 +147,7 @@ for (var i = 0; i <= 6; i++) {
 // get element by class name domino-container
 var dominoTable = document.querySelector('.top-left-2');
 var rightSide = document.querySelector('.right');
-var score = document.querySelector('.game-score-payed');
+var score = document.querySelector('.game-score-played');
 var scoreRemaining = document.querySelector('.game-score-remaining');
 var dominoesTiles = "";
 var gameHistory = [];
@@ -161,7 +168,7 @@ for (var i = 0; i < dominoes.length; i++) {
     var topDotList = sideA ? "<span class=\"dot\"></span>".repeat(sideA) : '';
     var bottomDotList = sideB ? "<span class=\"dot\"></span>".repeat(sideB) : '';
     var id = dominoes[i].getID();
-    tileElements[id] = "\n        <div>\n        <div class=\"domino-tile\" data-id=".concat(id, ">\n            <div class=\"tile-top ").concat(topDots, "\">\n                ").concat(topDotList, "\n            </div>\n            <div class=\"tile-divider\"></div>\n            <div class=\"tile-bottom ").concat(bottomDots, "\">\n                ").concat(bottomDotList, "\n            </div>\n        </div>\n        </div>\n    ");
+    tileElements[id] = "\n        <div class=\"domino-tile\" data-id=".concat(id, ">\n            <div class=\"tile-top ").concat(topDots, "\">\n                ").concat(topDotList, "\n            </div>\n            <div class=\"tile-divider\"></div>\n            <div class=\"tile-bottom ").concat(bottomDots, "\">\n                ").concat(bottomDotList, "\n            </div>\n        </div>\n    ");
 }
 rightSide === null || rightSide === void 0 ? void 0 : rightSide.addEventListener('click', function (e) {
     var _a;
@@ -200,7 +207,7 @@ function renderRightSide() {
             var topDotList = sideA ? "<span class=\"dot\"></span>".repeat(sideA) : '';
             var bottomDotList = sideB ? "<span class=\"dot\"></span>".repeat(sideB) : '';
             var id = rowToRender[j].getID();
-            rightSide.innerHTML += "\n            <div>\n            <div class=\"domino-tile\" data-id=".concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            </div>\n            ");
+            rightSide.innerHTML += "\n            <div class=\"domino-tile\" data-id=".concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            ");
         }
         var row = rowToRender.length;
         rightSide.innerHTML += "\n            <div id=\"cell-".concat(row, "\">\n            </div>\n        ");
@@ -212,17 +219,21 @@ function renderRightSide() {
 dominoTable === null || dominoTable === void 0 ? void 0 : dominoTable.addEventListener('click', function (e) {
     if (!state.selected)
         return;
-    var target = state.selected;
-    var domino = dominoes.find(function (domino) { var _a; return domino.getID() === ((_a = target === null || target === void 0 ? void 0 : target.dataset) === null || _a === void 0 ? void 0 : _a.id); });
+    var selectedDomino = state.selected;
+    var target = e.target;
+    var closestTile = target.closest('.domino-tile');
+    var closestTileID = closestTile === null || closestTile === void 0 ? void 0 : closestTile.getAttribute('data-id');
+    var domino = dominoes.find(function (domino) { var _a; return domino.getID() === ((_a = selectedDomino === null || selectedDomino === void 0 ? void 0 : selectedDomino.dataset) === null || _a === void 0 ? void 0 : _a.id); });
     if (!domino)
         return;
-    var pieceAdded = table.add(domino, player1);
+    var pieceAdded = table.add(domino, player1, closestTileID);
     if (pieceAdded) {
         gameHistory.push(state);
-        target.classList.remove('selected');
-        target.classList.add('played-tile');
+        selectedDomino.classList.remove('selected');
+        selectedDomino.classList.add('played-tile');
         state.selected = null;
         renderTable();
+        state.oldScore = state.currentScore;
         state.currentScore += domino.getValue();
         renderScore();
     }
@@ -241,7 +252,7 @@ function renderTable() {
         var rotation = tile.rotation !== 'none' ? "domino-rotate-".concat(tile.rotation) : '';
         var rotatedSize = rotation ? 'domino-rotate-size' : '';
         var id = tile.domino.getID();
-        return "\n            <div class=\"".concat(rotatedSize, "\">\n            <div class=\"domino-tile ").concat(rotation, "\" data-id=").concat(id, ">\n                <div class=\"tile-top ").concat(topDots, "\">\n                    ").concat(topDotList, "\n                </div>\n                <div class=\"tile-divider\"></div>\n                <div class=\"tile-bottom ").concat(bottomDots, "\">\n                    ").concat(bottomDotList, "\n                </div>\n            </div>\n            </div>\n        ");
+        return "\n            <div class=\"".concat(rotatedSize, "\">\n                <div class=\"domino-tile ").concat(rotation, "\" data-id=").concat(id, ">\n                    <div class=\"tile-top ").concat(topDots, "\">\n                        ").concat(topDotList, "\n                    </div>\n                    <div class=\"tile-divider\"></div>\n                    <div class=\"tile-bottom ").concat(bottomDots, "\">\n                        ").concat(bottomDotList, "\n                    </div>\n                </div>\n            </div>\n        ");
     }).join('');
     dominoTable.innerHTML = tableTilesHTML;
 }
