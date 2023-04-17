@@ -102,7 +102,7 @@ class Table {
         this.table = [];
     }
 
-    add(domino: Domino, player: Player): boolean {
+    add(domino: Domino, player: Player, closestTileID: string): boolean {
         const sideA: number = domino.getSideA();
         const sideB: number = domino.getSideB();
         const newTile: TableDomino = {
@@ -117,28 +117,34 @@ class Table {
             this.table.push(newTile);
             return true;
         }
+        const middle = Math.floor(this.table.length / 2);
+        const titleLocation = this.table.findIndex((tile) => tile.id === closestTileID);
         const firstTile: TableDomino = this.table[0];
         const lastTile: TableDomino = this.table[this.table.length - 1];
-
-        if (firstTile.position[0] === sideA) {
-            this.table.unshift({
-                ...newTile,
-                rotation: domino.isDouble() ? 'none' : 'left',
-                position: [sideB, sideA]
-            });
-            return true;
-        } else if (firstTile.position[0] === sideB) {
-            this.table.unshift({ ...newTile, rotation: domino.isDouble() ? 'none' : 'left', });
-            return true;
-        } else if (lastTile.position[1] === sideA) {
-            this.table.push({ ...newTile, rotation: domino.isDouble() ? 'none' : 'right', });
-            return true;
-        } else if (lastTile.position[1] === sideB) {
-            this.table.push({
-                ...newTile,
-                position: [sideB, sideA]
-            });
-            return true;
+        if (titleLocation < middle) {
+            // Left Side
+            if (firstTile.position[0] === sideA) {
+                this.table.unshift({
+                    ...newTile,
+                    rotation: domino.isDouble() ? 'none' : 'left',
+                    position: [sideB, sideA]
+                });
+                return true;
+            } else if (firstTile.position[0] === sideB) {
+                this.table.unshift({ ...newTile, rotation: domino.isDouble() ? 'none' : 'left', });
+                return true;
+            }
+        } else {
+            if (lastTile.position[1] === sideA) {
+                this.table.push({ ...newTile, rotation: domino.isDouble() ? 'none' : 'left', });
+                return true;
+            } else if (lastTile.position[1] === sideB) {
+                this.table.push({
+                    ...newTile,
+                    position: [sideB, sideA]
+                });
+                return true;
+            }
         }
         return false;
     }
@@ -181,7 +187,7 @@ for (let i = 0; i <= 6; i++) {
 // get element by class name domino-container
 const dominoTable = document.querySelector('.top-left-2');
 const rightSide = document.querySelector('.right');
-const score = document.querySelector('.game-score-payed');
+const score = document.querySelector('.game-score-played');
 const scoreRemaining = document.querySelector('.game-score-remaining')
 let dominoesTiles = ``;
 // dominoTable.innerHTML = dominoesTiles;
@@ -306,16 +312,20 @@ function renderRightSide() {
 
 dominoTable?.addEventListener('click', (e) => {
     if (!state.selected) return;
-    const target = state.selected as HTMLElement;
-    const domino = dominoes.find((domino) => domino.getID() === target?.dataset?.id);
+    const selectedDomino = state.selected as HTMLElement;
+    const target = e.target as HTMLElement;
+    const closestTile = target.closest('.domino-tile');
+    const closestTileID = closestTile?.getAttribute('data-id');
+    const domino = dominoes.find((domino) => domino.getID() === selectedDomino?.dataset?.id);
     if (!domino) return;
-    const pieceAdded = table.add(domino, player1);
+    const pieceAdded = table.add(domino, player1, closestTileID);
     if (pieceAdded) {
         gameHistory.push(state);
-        target.classList.remove('selected')
-        target.classList.add('played-tile');
+        selectedDomino.classList.remove('selected')
+        selectedDomino.classList.add('played-tile');
         state.selected = null;
         renderTable();
+        state.oldScore = state.currentScore;
         state.currentScore += domino.getValue();
         renderScore();
     }
